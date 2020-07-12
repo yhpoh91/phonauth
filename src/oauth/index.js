@@ -53,7 +53,7 @@ router.get('/', async (req, res, next) => {
       return;
     }
   
-    res.redirect(`${publicHost}/login.html?state=${state}&redirect_uri=${redirectUri}`);
+    res.redirect(`${publicHost}/login.html?state=${state}&redirect_uri=${encodeURIComponent(redirectUri)}`);
   } catch (error) {
     next(error);
   }
@@ -107,11 +107,11 @@ router.post('/login', async (req, res, next) => {
     const result = await nexmoService.verify.request(number);
     if (result.ok) {
       const { requestId } = result;
-      res.redirect(`${publicHost}/verify.html?number=${number}&request_id=${requestId}&state=${state}&redirect_uri=${redirectUri}`);
+      res.redirect(`${publicHost}/verify.html?number=${number}&request_id=${requestId}&state=${state}&redirect_uri=${encodeURIComponent(redirectUri)}`);
       return;
     }
   
-    res.redirect(`${publicHost}/login.html?state=${state}&redirect_uri=${redirectUri}&error=${result.errorText}`);
+    res.redirect(`${publicHost}/login.html?state=${state}&redirect_uri=${encodeURIComponent(redirectUri)}&error=${result.errorText}`);
   } catch (error) {
     next(error);
   }
@@ -135,7 +135,7 @@ router.post('/verify', async (req, res, next) => {
 
       if (user == null) {
         L.debug(`User for number ${number} does not exist, proceed to user setup`);
-        res.redirect(`${publicHost}/setup.html?number=${number}&state=${state}&redirect_uri=${redirectUri}`);
+        res.redirect(`${publicHost}/setup.html?number=${number}&state=${state}&redirect_uri=${encodeURIComponent(redirectUri)}`);
         return;
       }
 
@@ -149,7 +149,7 @@ router.post('/verify', async (req, res, next) => {
     }
 
     L.error(`Error (${requestId}): ${result.errorText}`);
-    res.redirect(`${publicHost}/verify.html?number=${number}&request_id=${requestId}&state=${state}&redirect_uri=${redirectUri}&error=${result.errorText}`);
+    res.redirect(`${publicHost}/verify.html?number=${number}&request_id=${requestId}&state=${state}&redirect_uri=${encodeURIComponent(redirectUri)}&error=${result.errorText}`);
   } catch (error) {
     next(error);
   }
