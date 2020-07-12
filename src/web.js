@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import http from 'http';
 import helmet from 'helmet';
 
+import apiRouter from './api';
 import oauthRouter from './oauth'; 
 import loggerService from './services/logger';
 import errorHandler from './services/errorHandler';
@@ -30,6 +31,7 @@ app.use(bodyParser.json());
 
 // Api Router
 app.use('/', express.static('public'));
+app.use('/api', apiRouter);
 app.use('/oauth', oauthRouter);
 app.use(errorHandler.handleUnmatched);
 app.use(errorHandler.handleError);
