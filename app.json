@@ -16,6 +16,19 @@
       "description": "Name of Heroku App. Copy from the name",
       "required": true
     },
+    "SECRET_KEY": {
+      "description": "Secret Key to access APIs to manage Users and Clients",
+      "required": true
+    },
+    "JWT_SECRET": {
+      "description": "Secret Key for JsonWebToken signing",
+      "required": true
+    },
+    "JWT_EXPIRY": {
+      "description": "Duration in seconds for JWT expiry",
+      "required": true,
+      "default": "3600"
+    },
     "NEXMO_API_KEY": {
       "description": "Nexmo API Key",
       "required": true

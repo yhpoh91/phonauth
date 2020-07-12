@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import { v4 as uuid } from 'uuid';
 import crypto from 'crypto';
+import jsonwebtoken from 'jsonwebtoken';
 
 import databaseService from '../services/database';
 import loggerService from '../services/logger';
@@ -11,6 +12,9 @@ const { L } = loggerService('Phone Oauth Router');
 
 const isHeroku = (process.env.IS_HEROKU || 'false').toLowerCase() === 'true';
 const publicHost = isHeroku ? `https://${process.env.HEROKU_APP_NAME}.herokuapp.com` : process.env.PUBLIC_HOST;
+
+const jwtSecret = process.env.JWT_SECRET;
+const jwtExpiry = parseInt(process.env.JWT_EXPIRY || '3600', 10);
 
 const router = express.Router({ mergeParams: true });
 
@@ -84,21 +88,57 @@ router.post('/token', async (req, res, next) => {
       return;
     }
 
-    // TODO: Check Code
-
     // Check Client ID against Client Secret
     const { Client } = databaseService;
-    const where = { id: clientId, secret: clientSecret, redirectUri };
-    const query = { where };
+    let where = { id: clientId, secret: clientSecret, redirectUri };
+    let query = { where };
     const client = await Client.findOne(query);
     if (client == null) {
       res.status(401).send('unauthenticated');
       return;
     }
 
+    // Check Code
+    const { Code } = databaseService;
+    where = { code, clientId, redirectUri };
+    query = { where };
+    const codeObj = await Code.findOne(query);
+    if (codeObj == null) {
+      res.status(403).send('invalid code');
+      return;
+    }
+
+    // Delete Code (state is no longer useful)
+    Code.destroy(query);
+
+    // Get User
+    const { userId } = codeObj;
+    const { User } = databaseService;
+    where = { id: userId };
+    query = { where };
+    const userObj = await User.findOne(query);
+    const userData = userObj.dataValues;
+
+    // Get JWT
+    const currentMs = new Date().getTime()
+    const currentTime = Math.floor(currentMs / 1000);
+    const expiryTime = currentTime + jwtExpiry;
+    const accessToken = jsonwebtoken.sign({
+      sub: userId,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      name: `${userData.firstName} ${userData.lastName}`,
+      email: userData.email,
+      number: userData.number,
+      iat: currentTime,
+      exp: expiryTime,
+    }, jwtSecret);
+
+
+    // Reply to user
     res.json({
-      access_token: 'meowmeow',
-      expires_in: 3600,
+      access_token: accessToken,
+      expires_in: jwtExpiry,
       token_type: 'bearer'
     });
   } catch (error) {
@@ -175,10 +215,22 @@ router.post('/verify', async (req, res, next) => {
       delete userData.createdAt;
       delete userData.updatedAt;
 
+      // Create Code
+      const { Code } = databaseService;
+      const code = await Code.create({
+        id: uuid(),
+        clientId: stateObj.dataValues.clientId,
+        userId: user.dataValues.id,
+        code: crypto.randomBytes(128).toString('hex'),
+        redirectUri,
+      });
+      const codeValue = code.dataValues.code;
+
       // Delete State (state is no longer useful)
       State.destroy(stateQuery);
 
-      res.json(userData);
+      // Redirect
+      res.redirect(`${redirectUri}?code=${codeValue}`);
       return;
     }
 
@@ -217,17 +269,25 @@ router.post('/setup', async (req, res, next) => {
       lastName,
       email,
     });
-    
-    // Map User Data
-    const userData = user.dataValues;
-    userData.name = `${userData.firstName} ${userData.lastName}`;
-    delete userData.createdAt;
-    delete userData.updatedAt;
+
+    // Create Code
+    const { Code } = databaseService;
+    const code = await Code.create({
+      id: uuid(),
+      clientId: stateObj.dataValues.clientId,
+      userId: user.dataValues.id,
+      code: crypto.randomBytes(128).toString('hex'),
+      redirectUri,
+    });
+    const codeValue = code.dataValues.code;
+
+
 
     // Delete State (state is no longer useful)
     State.destroy(stateQuery);
-
-    res.json(userData);
+    
+    // Redirect
+    res.redirect(`${redirectUri}?code=${codeValue}`);
   } catch (error) {
     next(error);
   }
