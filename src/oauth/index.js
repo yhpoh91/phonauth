@@ -52,6 +52,15 @@ router.get('/', async (req, res, next) => {
       res.redirect(`${publicHost}/error.html?code=${errorCode}&text=${errorText}&desc=${errorDesc}`);
       return;
     }
+
+    // Create State
+    const { State } = databaseService;
+    const stateObj = await State.create({
+      id: uuid(),
+      clientId,
+      state,
+      redirectUri,
+    });
   
     res.redirect(`${publicHost}/login.html?state=${state}&redirect_uri=${encodeURIComponent(redirectUri)}`);
   } catch (error) {
@@ -101,7 +110,18 @@ router.post('/login', async (req, res, next) => {
   try {
     const { number, state, redirectUri } = req.body;
 
-    // TODO: Check State
+    // Check State
+    const { State } = databaseService;
+    const where = { state, redirectUri };
+    const stateQuery = { where };
+    const stateObj = await State.findOne(stateQuery);
+    if (stateObj == null) {
+      const errorCode = 401;
+      const errorText = encodeURIComponent('invalid_state');
+      const errorDesc = encodeURIComponent('The OAuth state is not valid');
+      res.redirect(`${publicHost}/error.html?code=${errorCode}&text=${errorText}&desc=${errorDesc}`);
+      return;
+    }
   
     // Submit Verify Request
     const result = await nexmoService.verify.request(number);
@@ -123,7 +143,18 @@ router.post('/verify', async (req, res, next) => {
       number, code, state, redirectUri, requestId,
     } = req.body;
 
-    // TODO: Check State
+    // Check State
+    const { State } = databaseService;
+    const where = { state, redirectUri };
+    const stateQuery = { where };
+    const stateObj = await State.findOne(stateQuery);
+    if (stateObj == null) {
+      const errorCode = 401;
+      const errorText = encodeURIComponent('invalid_state');
+      const errorDesc = encodeURIComponent('The OAuth state is not valid');
+      res.redirect(`${publicHost}/error.html?code=${errorCode}&text=${errorText}&desc=${errorDesc}`);
+      return;
+    }
 
     // Submit Verify Check
     const result = await nexmoService.verify.check(requestId, code);
@@ -144,6 +175,9 @@ router.post('/verify', async (req, res, next) => {
       delete userData.createdAt;
       delete userData.updatedAt;
 
+      // Delete State (state is no longer useful)
+      State.destroy(stateQuery);
+
       res.json(userData);
       return;
     }
@@ -161,7 +195,18 @@ router.post('/setup', async (req, res, next) => {
       number, firstName, lastName, email, redirectUri, state,
     } = req.body;
 
-    // TODO: Check State
+    // Check State
+    const { State } = databaseService;
+    const where = { state, redirectUri };
+    const stateQuery = { where };
+    const stateObj = await State.findOne(stateQuery);
+    if (stateObj == null) {
+      const errorCode = 401;
+      const errorText = encodeURIComponent('invalid_state');
+      const errorDesc = encodeURIComponent('The OAuth state is not valid');
+      res.redirect(`${publicHost}/error.html?code=${errorCode}&text=${errorText}&desc=${errorDesc}`);
+      return;
+    }
 
     // Create New Phone User
     const { User } = databaseService;
@@ -173,10 +218,14 @@ router.post('/setup', async (req, res, next) => {
       email,
     });
     
+    // Map User Data
     const userData = user.dataValues;
     userData.name = `${userData.firstName} ${userData.lastName}`;
     delete userData.createdAt;
     delete userData.updatedAt;
+
+    // Delete State (state is no longer useful)
+    State.destroy(stateQuery);
 
     res.json(userData);
   } catch (error) {
