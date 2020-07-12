@@ -153,6 +153,16 @@
             element4.id = 'number';
             element4.name = 'number';
             element4.value = params.number;
+
+            const element5 = document.createElement('input');
+            element5.id = 'state';
+            element5.name = 'state';
+            element5.value = params.state;
+
+            const element6 = document.createElement('input');
+            element6.id = 'redirectUri';
+            element6.name = 'redirectUri';
+            element6.value = params.redirect_uri;
             
             const form = document.createElement('form');
             form.method = 'POST';
@@ -161,6 +171,8 @@
             form.appendChild(element2);
             form.appendChild(element3);
             form.appendChild(element4);
+            form.appendChild(element5);
+            form.appendChild(element6);
 
             document.body.appendChild(form);
             form.submit();

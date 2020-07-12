@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { v4 as uuid } from 'uuid';
+import crypto from 'crypto';
 
 import databaseService from '../services/database';
 import loggerService from '../services/logger';
@@ -17,7 +18,7 @@ router.get('/', async (req, res, next) => {
   try {
     const {
       response_type: responseType,
-      state,
+      state = crypto.randomBytes(16).toString('hex'),
       redirect_uri: redirectUri,
       client_id: clientId,
     } = req.query;
@@ -58,10 +59,49 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/token', async (req, res, next) => {
   try {
-    console.log(req.body);
+    const {
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: redirectUri,
+      grant_type: grantType,
+      code,
+    } = req.body;
+
+    // Check Grant Type
+    if (grantType !== 'authorization_code') {
+      res.status(400).send('invalid grant type');
+      return;
+    }
+
+    // TODO: Check Code
+
+    // Check Client ID against Client Secret
+    const { Client } = databaseService;
+    const where = { id: clientId, secret: clientSecret, redirectUri };
+    const query = { where };
+    const client = await Client.findOne(query);
+    if (client == null) {
+      res.status(401).send('unauthenticated');
+      return;
+    }
+
+    res.json({
+      access_token: 'meowmeow',
+      expires_in: 3600,
+      token_type: 'bearer'
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/login', async (req, res, next) => {
+  try {
     const { number, state, redirectUri } = req.body;
+
+    // TODO: Check State
   
     // Submit Verify Request
     const result = await nexmoService.verify.request(number);
@@ -77,12 +117,13 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.post('/verify', async (req, res) => {
+router.post('/verify', async (req, res, next) => {
   try {
-    console.log(req.body);
     const {
       number, code, state, redirectUri, requestId,
     } = req.body;
+
+    // TODO: Check State
 
     // Submit Verify Check
     const result = await nexmoService.verify.check(requestId, code);
@@ -114,12 +155,13 @@ router.post('/verify', async (req, res) => {
   }
 });
 
-router.post('/setup', async (req, res) => {
+router.post('/setup', async (req, res, next) => {
   try {
-    console.log(req.body);
     const {
-      number, firstName, lastName, email,
+      number, firstName, lastName, email, redirectUri, state,
     } = req.body;
+
+    // TODO: Check State
 
     // Create New Phone User
     const { User } = databaseService;
