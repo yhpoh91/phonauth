@@ -1,0 +1,125 @@
+<html>
+  <head>
+    <title>Phone Login</title>
+    <link rel="stylesheet" href="/intltelinput/intlTelInput.min.css">
+  </head>
+
+  <style>
+    div {
+      box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+    }
+
+    h1 {
+      font-weight: 300;
+      font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+      font-size: 24px;
+      margin-bottom: 32px;
+    }
+
+    .outer-container {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .inner-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+    }
+
+    .content {
+      min-width: 400px;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #c6c6c6;
+      border-radius: 6px;
+    }
+
+    .content-title {
+      width: 100%;
+      border-bottom: 1px solid #c6c6c6;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    .content-body {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    
+    .error-title {
+      font-weight: 700;
+      font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    }
+  </style>
+
+  <body>
+    <div class="outer-container">
+      <div class="inner-container">
+        
+        <div class="content">
+
+          <div class="content-body">
+            <h1>Authorization Error</h1>
+
+            <div class="error-title">
+              <span>Error</span>
+              <span id="error-code"></span>
+              <span>:</span>
+              <span id="error-text"></span>
+            </div>
+            <div id="error-description" class="error-description"></div>
+          </div>
+
+        </div>
+
+        <script src="intltelinput/intlTelInput.min.js"></script>
+        <script>
+          const getParams = () => {
+            const searchString = window.location.search || '?';
+            const query = searchString.slice(1);
+            const components = query.split(/&/g);
+            const params = {};
+
+            for (let i = 0; i < components.length; i += 1) {
+              const component = components[i];
+              const sections = component.split(/=/g);
+              if (sections.length > 1) {
+                const key = decodeURIComponent(sections[0]);
+                const value = decodeURIComponent(sections[1]);
+                params[key] = value;
+              }
+            }
+
+            return params;
+          };
+
+          const params = getParams();
+          const errorCode = document.getElementById('error-code');
+          errorCode.innerText = params.code ? params.code : 401;
+
+          const errorText = document.getElementById('error-text');
+          errorText.innerText = params.text;
+          
+          const errorDescription = document.getElementById('error-description');
+          errorDescription.innerText = params.desc;
+          
+        </script>
+      </div>
+    </div>
+  </body>
+</html>
