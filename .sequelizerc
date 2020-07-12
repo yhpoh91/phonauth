@@ -1,0 +1,28 @@
+require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
+
+let directory = '';
+if (process.env.NODE_ENV === 'production') {
+  console.log('Using Production sequelizerc: build');
+  directory = 'build/services/database';
+} else {
+  console.log('Using Develop sequelizerc: src');
+  directory = 'src/services/database';
+}
+
+const configPath = path.resolve(directory, 'config.js');
+const modelsPath = path.resolve(directory, 'models');
+const seedersPath = path.resolve(directory, 'seeders');
+const migrationsPath = path.resolve(directory, 'migrations');
+
+fs.mkdirSync(modelsPath, { recursive: true });
+fs.mkdirSync(seedersPath, { recursive: true });
+fs.mkdirSync(migrationsPath, { recursive: true });
+
+module.exports = {
+  'config': configPath,
+  'models-path': modelsPath,
+  'seeders-path': seedersPath,
+  'migrations-path': migrationsPath
+};

@@ -1,0 +1,62 @@
+{
+  "name": "phonauth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "web.js",
+  "scripts": {
+    "start": "NODE_ENV=production node build/webIndex.js",
+    "web": "NODE_ENV=development babel-node src/webIndex.js",
+    "clean": "rm -rf build",
+    "build": "npm run clean && babel src -D -d build",
+    "migrate": "sequelize-cli db:migrate",
+    "undomigrate": "sequelize-cli db:migrate:undo",
+    "heroku-postbuild": "npm run build && npm run migrate",
+    "test": "mocha \"./{,!(node_modules)/**/}*.test.js\" --require babel-polyfill --require esm"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.2.5",
+    "axios": "^0.19.2",
+    "body-parser": "^1.19.0",
+    "connection-string-parser": "^1.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "fs": "0.0.1-security",
+    "helmet": "^3.22.0",
+    "jsonwebtoken": "^8.5.1",
+    "log4js": "^6.3.0",
+    "moment": "^2.24.0",
+    "path": "^0.12.7",
+    "pg": "^7.12.1",
+    "pg-hstore": "^2.3.3",
+    "sequelize": "^5.19.2",
+    "uuid": "^8.1.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.10.1",
+    "@babel/core": "^7.10.2",
+    "@babel/node": "^7.10.1",
+    "@babel/preset-env": "^7.10.2",
+    "@babel/preset-flow": "^7.9.0",
+    "babel-eslint": "^10.1.0",
+    "babel-jest": "^24.1.0",
+    "eslint": "^7.1.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.2",
+    "esm": "^3.2.25",
+    "mocha": "^7.2.0",
+    "regenerator-runtime": "^0.13.5",
+    "sequelize-cli": "^5.5.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yhpoh91/phonauth.git"
+  },
+  "keywords": [
+    "phone",
+    "auth",
+    "oauth"
+  ],
+  "author": "Yee Hui Poh <yhpoh91@gmail.com>",
+  "license": "ISC"
+}

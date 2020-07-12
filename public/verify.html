@@ -1,0 +1,165 @@
+<html>
+  <head>
+    <title>Phone Verify</title>
+  </head>
+
+  <style>
+    div {
+      box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+    }
+
+    label {
+      font-weight: 500;
+      font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+      margin-bottom: 8px;
+    }
+
+    .outer-container {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .inner-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+    }
+
+    .content {
+      min-width: 400px;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #c6c6c6;
+      border-radius: 6px;
+    }
+
+    .content-title {
+      width: 100%;
+      border-bottom: 1px solid #c6c6c6;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    .content-body {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    .form-field {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 16px;
+    }
+
+    .error {
+      width: 100%;
+      color: red;
+      font-style: italic;
+    }
+  </style>
+
+  <body>
+    <div class="outer-container">
+      <div class="inner-container">
+        
+        <div class="content">
+
+          <div class="content-title">
+            Verify phone number
+          </div>
+
+          <div class="content-body">
+            <div class="form-field">
+              <label>Enter the OTP sent to your phone</label>
+              <input type="number" id="code" name="code">
+              <div id="error" class="error"></div>
+            </div>
+
+            <button id="verify" name="verify">Verify</button>
+
+          </div>
+
+        </div>
+
+        <script>
+          const getParams = () => {
+            const searchString = window.location.search || '?';
+            const query = searchString.slice(1);
+            const components = query.split(/&/g);
+            const params = {};
+
+            for (let i = 0; i < components.length; i += 1) {
+              const component = components[i];
+              const sections = component.split(/=/g);
+              if (sections.length > 1) {
+                const key = decodeURIComponent(sections[0]);
+                const value = decodeURIComponent(sections[1]);
+                params[key] = value;
+              }
+            }
+
+            return params;
+          };
+
+          const params = getParams();
+          if (params.error && params.error !== '') {
+            const errorDiv = document.getElementById('error');
+            errorDiv.innerText = params.error;
+          }
+
+          const button = document.getElementById('verify');
+          button.onclick = () => {
+            const element1 = document.getElementById('code');
+
+            const element2 = document.createElement('input');
+            element2.id = 'number';
+            element2.name = 'number';
+            element2.value = params.number;
+
+            const element3 = document.createElement('input');
+            element3.id = 'state';
+            element3.name = 'state';
+            element3.value = params.state;
+
+            const element4 = document.createElement('input');
+            element4.id = 'requestId';
+            element4.name = 'requestId';
+            element4.value = params.request_id;
+
+            const element5 = document.createElement('input');
+            element5.id = 'redirectUri';
+            element5.name = 'redirectUri';
+            element5.value = params.redirect_uri;
+            
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/oauth/verify';
+            form.appendChild(element1);
+            form.appendChild(element2);
+            form.appendChild(element3);
+            form.appendChild(element4);
+            form.appendChild(element5);
+
+            document.body.appendChild(form);
+            form.submit();
+          }
+        </script>
+      </div>
+    </div>
+  </body>
+</html>

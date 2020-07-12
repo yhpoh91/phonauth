@@ -1,0 +1,169 @@
+<html>
+  <head>
+    <title>Phone Login</title>
+    <link rel="stylesheet" href="/intltelinput/intlTelInput.min.css">
+  </head>
+
+  <style>
+    div {
+      box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+    }
+
+    label {
+      font-weight: 500;
+      font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+      margin-bottom: 8px;
+    }
+
+    .outer-container {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .inner-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+    }
+
+    .content {
+      min-width: 400px;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #c6c6c6;
+      border-radius: 6px;
+    }
+
+    .content-title {
+      width: 100%;
+      border-bottom: 1px solid #c6c6c6;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    .content-body {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    .form-field {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 16px;
+    }
+
+    .iti__flag {background-image: url("/intltelinput/flags.png");}
+
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .iti__flag {background-image: url("/intltelinput/flags@2x.png");}
+}
+  </style>
+
+  <body>
+    <div class="outer-container">
+      <div class="inner-container">
+        
+        <div class="content">
+
+          <div class="content-title">
+            Sign in with Phone
+          </div>
+
+          <div class="content-body">
+            <div class="form-field">
+              <label>Enter your phone number to login</label>
+              <input type="tel" id="number" name="number">
+              <div id="error" class="error"></div>
+            </div>
+
+            <button id="login" name="login">Login</button>
+
+          </div>
+
+        </div>
+
+        <script src="intltelinput/intlTelInput.min.js"></script>
+        <script>
+          const getParams = () => {
+            const searchString = window.location.search || '?';
+            const query = searchString.slice(1);
+            const components = query.split(/&/g);
+            const params = {};
+
+            for (let i = 0; i < components.length; i += 1) {
+              const component = components[i];
+              const sections = component.split(/=/g);
+              if (sections.length > 1) {
+                const key = decodeURIComponent(sections[0]);
+                const value = decodeURIComponent(sections[1]);
+                params[key] = value;
+              }
+            }
+
+            return params;
+          };
+
+          const params = getParams();
+          if (params.error && params.error !== '') {
+            const errorDiv = document.getElementById('error');
+            errorDiv.innerText = params.error;
+          }
+
+          const numberInput = document.getElementById('number');
+          const intlInstance = window.intlTelInput(numberInput, {
+            initialCountry: 'sg',
+            separateDialCode: true,
+            utilsScript: '/intltelinput/utils.js'
+          });
+
+          const button = document.getElementById('login');
+          button.onclick = () => {
+            const number = intlInstance.getNumber().replace(/\+|\s|\.|,|-|\/|\*|_|\D/g, '');
+            
+            const element1 = document.createElement('input');
+            element1.id = 'number';
+            element1.name = 'number';
+            element1.value = number;
+
+            const element2 = document.createElement('input');
+            element2.id = 'state';
+            element2.name = 'state';
+            element2.value = params.state;
+
+            const element3 = document.createElement('input');
+            element3.id = 'redirectUri';
+            element3.name = 'redirectUri';
+            element3.value = params.redirect_uri;
+
+            // Create Form
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/oauth/login';
+            form.appendChild(element1);
+            form.appendChild(element2);
+            form.appendChild(element3);
+
+            // Submit Form
+            document.body.appendChild(form);
+            form.submit();
+          }
+        </script>
+      </div>
+    </div>
+  </body>
+</html>
