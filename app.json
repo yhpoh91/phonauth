@@ -56,6 +56,18 @@
       "description": "Nexmo Verify Workflow. See https://developer.nexmo.com/verify/guides/workflows-and-events for available values",
       "required": false,
       "value": "5"
+    },
+    "CLIENT_ID": {
+      "description": "Default Client ID to use (admin only)",
+      "required": true
+    },
+    "CLIENT_SECRET": {
+      "description": "Default Client ID to use (admin only)",
+      "required": true
+    },
+    "REDIRECT_URI": {
+      "description": "Default Redirect URI to use (admin only)",
+      "required": true
     }
   }
 }

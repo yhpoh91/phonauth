@@ -16,6 +16,10 @@ const publicHost = isHeroku ? `https://${process.env.HEROKU_APP_NAME}.herokuapp.
 const jwtSecret = process.env.JWT_SECRET;
 const jwtExpiry = parseInt(process.env.JWT_EXPIRY || '3600', 10);
 
+const defaultClientId = process.env.CLIENT_ID;
+const defaultClientSecret = process.env.CLIENT_SECRET;
+const defaultRedirectUri = process.env.REDIRECT_URI;
+
 const router = express.Router({ mergeParams: true });
 
 router.get('/', async (req, res, next) => {
@@ -35,27 +39,30 @@ router.get('/', async (req, res, next) => {
       return;
     }
   
-    const { Client } = databaseService;
-    const where = { id: clientId };
-    const query = { where };
-    const client = await Client.findOne(query);
-  
-    if (client == null) {
-      const errorCode = 401;
-      const errorText = encodeURIComponent('invalid_client');
-      const errorDesc = encodeURIComponent('The OAuth client was not found.');
-      res.redirect(`${publicHost}/error.html?code=${errorCode}&text=${errorText}&desc=${errorDesc}`);
-      return;
+    if (clientId !== defaultClientId || redirectUri !== defaultRedirectUri) {
+      const { Client } = databaseService;
+      const where = { id: clientId };
+      const query = { where };
+      const client = await Client.findOne(query);
+    
+      if (client == null) {
+        const errorCode = 401;
+        const errorText = encodeURIComponent('invalid_client');
+        const errorDesc = encodeURIComponent('The OAuth client was not found.');
+        res.redirect(`${publicHost}/error.html?code=${errorCode}&text=${errorText}&desc=${errorDesc}`);
+        return;
+      }
+    
+      const clientData = client.dataValues;
+      if (clientData.redirectUri !== redirectUri) {
+        const errorCode = 401;
+        const errorText = encodeURIComponent('invalid_redirect_uri');
+        const errorDesc = encodeURIComponent('The OAuth redirect URI is not authorized');
+        res.redirect(`${publicHost}/error.html?code=${errorCode}&text=${errorText}&desc=${errorDesc}`);
+        return;
+      }
     }
-  
-    const clientData = client.dataValues;
-    if (clientData.redirectUri !== redirectUri) {
-      const errorCode = 401;
-      const errorText = encodeURIComponent('invalid_redirect_uri');
-      const errorDesc = encodeURIComponent('The OAuth redirect URI is not authorized');
-      res.redirect(`${publicHost}/error.html?code=${errorCode}&text=${errorText}&desc=${errorDesc}`);
-      return;
-    }
+
 
     // Create State
     const { State } = databaseService;
@@ -88,14 +95,16 @@ router.post('/token', async (req, res, next) => {
       return;
     }
 
-    // Check Client ID against Client Secret
-    const { Client } = databaseService;
-    let where = { id: clientId, secret: clientSecret, redirectUri };
-    let query = { where };
-    const client = await Client.findOne(query);
-    if (client == null) {
-      res.status(401).send('unauthenticated');
-      return;
+    if (clientId !== defaultClientId || clientSecret !== defaultClientSecret || redirectUri !== defaultRedirectUri) {
+      // Check Client ID against Client Secret
+      const { Client } = databaseService;
+      let where = { id: clientId, secret: clientSecret, redirectUri };
+      let query = { where };
+      const client = await Client.findOne(query);
+      if (client == null) {
+        res.status(401).send('unauthenticated');
+        return;
+      }
     }
 
     // Check Code

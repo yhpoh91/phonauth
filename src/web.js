@@ -31,6 +31,10 @@ app.use(bodyParser.json());
 
 // Api Router
 app.use('/', express.static('public'));
+app.get('/sinkhole', (req, res) => {
+  L.debug(req.query);
+  res.send();
+});
 app.use('/api', apiRouter);
 app.use('/oauth', oauthRouter);
 app.use(errorHandler.handleUnmatched);
