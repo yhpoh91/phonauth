@@ -95,11 +95,13 @@ router.post('/token', async (req, res, next) => {
       return;
     }
 
+    let where;
+    let query;
     if (clientId !== defaultClientId || clientSecret !== defaultClientSecret || redirectUri !== defaultRedirectUri) {
       // Check Client ID against Client Secret
       const { Client } = databaseService;
-      let where = { id: clientId, secret: clientSecret, redirectUri };
-      let query = { where };
+      where = { id: clientId, secret: clientSecret, redirectUri };
+      query = { where };
       const client = await Client.findOne(query);
       if (client == null) {
         res.status(401).send('unauthenticated');
