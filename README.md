@@ -6,7 +6,9 @@ Simple Mobile Phone based OAuth2 provider.
 
 ### Setup (Local)
 1. clone this repo
-2. run `npm install` to install dependencies
-3. setup `.env` according to `.env.example`
-4. run `npm run build` to build
-4. run `npm start` to start server
+2. install PostgresQL database and obtain the connection string
+3. run `npm install` to install dependencies
+4. setup `.env` according to `.env.example`
+5. run `npm run build` to build
+6. run `npm run migrate` to migrate database to latest state
+7. run `npm start` to start server
