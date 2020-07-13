@@ -10,7 +10,7 @@
     "IS_HEROKU": {
       "desription": "Stating that this is a heroku application",
       "required": true,
-      "default": true
+      "value": "true"
     },
     "HEROKU_APP_NAME" : {
       "description": "Name of Heroku App. Copy from the name",
@@ -26,8 +26,8 @@
     },
     "JWT_EXPIRY": {
       "description": "Duration in seconds for JWT expiry",
-      "required": true,
-      "default": "3600"
+      "required": false,
+      "value": "3600"
     },
     "NEXMO_API_KEY": {
       "description": "Nexmo API Key",
@@ -40,21 +40,22 @@
     "NEXMO_BRAND": {
       "description": "Brand Name. This will show up in the OTP SMS or Voice Call",
       "required": false,
-      "default": "Phonauth"
+      "value": "Phonauth"
     },
     "NEXMO_SENDER_ID": {
       "description": "Sender ID for the OTP SMS",
       "required": false,
-      "default": "Phonauth"
+      "value": "Phonauth"
     },
     "NEXMO_CODE_LENGTH": {
       "description": "Number of digit for the OTP code",
       "required": false,
-      "default": 6
+      "value": "6"
     },
     "NEXMO_WORKFLOW_ID": {
       "description": "Nexmo Verify Workflow. See https://developer.nexmo.com/verify/guides/workflows-and-events for available values",
-      "required": false
+      "required": false,
+      "value": "5"
     }
   }
 }
