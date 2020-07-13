@@ -29,7 +29,16 @@ router.get('/', async (req, res, next) => {
       state = crypto.randomBytes(16).toString('hex'),
       redirect_uri: redirectUri,
       client_id: clientId,
+      scope,
     } = req.query;
+  
+    if (responseType !== 'code') {
+      const errorCode = 400;
+      const errorText = encodeURIComponent('response_type_not_supported');
+      const errorDesc = encodeURIComponent('The OAuth response type is not supported.');
+      res.redirect(`${publicHost}/error.html?code=${errorCode}&text=${errorText}&desc=${errorDesc}`);
+      return;
+    }
   
     if (clientId == null) {
       const errorCode = 401;
@@ -143,6 +152,8 @@ router.post('/token', async (req, res, next) => {
       number: userData.number,
       iat: currentTime,
       exp: expiryTime,
+      iss: publicHost,
+      aud: clientId,
     }, jwtSecret);
 
 
