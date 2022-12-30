@@ -45,7 +45,7 @@
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-plugin-import": "^2.20.2",
     "esm": "^3.2.25",
-    "mocha": "^7.2.0",
+    "mocha": "^10.2.0",
     "regenerator-runtime": "^0.13.5",
     "sequelize-cli": "^5.5.1"
   },
